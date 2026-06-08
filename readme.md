@@ -49,12 +49,12 @@ emergency-call-center/
 │   ├── types.hpp             # Struct Case, konstanta, kategori default
 │   └── store.hpp / store.cpp # Global state: Queue, Stack, allCases[]
 ├── modules/
-│   ├── call.hpp / call.cpp         # /call dan /queue
-│   ├── dispatch.hpp / dispatch.cpp # /dispatch
-│   ├── history.hpp / history.cpp   # /history
-│   ├── search.hpp / search.cpp     # /search <id>
-│   ├── report.hpp / report.cpp     # /report
-│   └── help.hpp / help.cpp         # /help
+│   ├── call.hpp / call.cpp         # call dan queue
+│   ├── dispatch.hpp / dispatch.cpp # dispatch
+│   ├── history.hpp / history.cpp   # history
+│   ├── search.hpp / search.cpp     # search <id>
+│   ├── report.hpp / report.cpp     # report
+│   └── help.hpp / help.cpp         # help
 └── utils/
     └── display.hpp / display.cpp   # Helper: print banner, warna, timestamp
 ```
@@ -62,12 +62,12 @@ emergency-call-center/
 ### 2.2 Alur Data Antar Modul
 
 ```
-Pelapor input (/call)
+Pelapor input (call)
         │
         ▼
    [ QUEUE ]  ◄──────────────────────── antrian aktif, FIFO
         │
-        │ /dispatch (dequeue front)
+        │ dispatch (dequeue front)
         ▼
    [ STACK ]  ◄──────────────────────── riwayat selesai, LIFO
         │
@@ -76,13 +76,13 @@ Pelapor input (/call)
         │
    ┌────┴────┐
    ▼         ▼
-/search    /report
+search    report
 (D&C)    (Parallel)
 ```
 
 **Penjelasan:**
-- Setiap kasus yang dibuat via `/call` disimpan di **Queue** dan **allCases[]** sekaligus.
-- Ketika `/dispatch` dipanggil, kasus dikeluarkan dari Queue, statusnya diubah ke `"handled"`, lalu di-push ke Stack.
+- Setiap kasus yang dibuat via `call` disimpan di **Queue** dan **allCases[]** sekaligus.
+- Ketika `dispatch` dipanggil, kasus dikeluarkan dari Queue, statusnya diubah ke `"handled"`, lalu di-push ke Stack.
 - `allCases[]` tidak pernah dihapus — ia adalah rekam jejak seluruh kasus untuk keperluan search dan report.
 
 ---
@@ -195,7 +195,7 @@ void initStore() {
 
 ---
 
-### 4.1 Modul Queue — `/call` & `/queue`
+### 4.1 Modul Queue — `call` & `queue`
 
 **File:** `modules/call.hpp` / `modules/call.cpp`
 
@@ -205,8 +205,8 @@ void initStore() {
 void enqueue(Queue& q, Case c);   // tambah kasus ke belakang antrian
 Case dequeue(Queue& q);           // ambil kasus dari depan antrian
 bool isQueueEmpty(Queue& q);      // cek antrian kosong
-void cmdCall();                   // handler command /call
-void cmdQueue();                  // handler command /queue
+void cmdCall();                   // handler command call
+void cmdQueue();                  // handler command queue
 ```
 
 #### Logika `cmdCall()`:
@@ -261,7 +261,7 @@ Return data
 
 ---
 
-### 4.2 Modul Dispatch — `/dispatch`
+### 4.2 Modul Dispatch — `dispatch`
 
 **File:** `modules/dispatch.hpp` / `modules/dispatch.cpp`
 
@@ -291,7 +291,7 @@ void cmdDispatch();
 
 ---
 
-### 4.3 Modul Stack — `/history`
+### 4.3 Modul Stack — `history`
 
 **File:** `modules/history.hpp` / `modules/history.cpp`
 
@@ -302,7 +302,7 @@ void pushStack(Stack& s, Case c);   // push kasus ke top stack
 Case popStack(Stack& s);            // pop dari top stack
 Case peekStack(Stack& s);           // lihat top tanpa hapus
 bool isStackEmpty(Stack& s);        // cek stack kosong
-void cmdHistory();                  // handler command /history
+void cmdHistory();                  // handler command history
 ```
 
 #### Logika `cmdHistory()`:
@@ -350,7 +350,7 @@ Return data
 
 ---
 
-### 4.4 Modul Search — `/search <id>`
+### 4.4 Modul Search — `search <id>`
 
 **File:** `modules/search.hpp` / `modules/search.cpp`
 
@@ -413,11 +413,11 @@ binarySearch(arr, size, targetId):
 |---|---|---|---|
 | Merge Sort | O(n log n) | O(n log n) | O(n log n) |
 | Binary Search | O(1) | O(log n) | O(log n) |
-| Total `/search` | O(n log n) | O(n log n) | O(n log n) |
+| Total `search` | O(n log n) | O(n log n) | O(n log n) |
 
 ---
 
-### 4.5 Modul Report — `/report`
+### 4.5 Modul Report — `report`
 
 **File:** `modules/report.hpp` / `modules/report.cpp`
 
@@ -478,7 +478,7 @@ g++ -std=c++11 -pthread main.cpp core/store.cpp modules/*.cpp utils/display.cpp 
 
 ---
 
-### 4.6 Modul Help — `/help`
+### 4.6 Modul Help — `help`
 
 **File:** `modules/help.hpp` / `modules/help.cpp`
 
@@ -492,14 +492,14 @@ void cmdHelp();
 
 ```
 Available commands:
-  /call          Register a new emergency call
-  /queue         Show current call queue
-  /dispatch      Handle next call in queue
-  /history       View & manage handled cases
-  /search <id>   Search case by ID (all cases)
-  /report        Generate daily report
-  /help          Show this help message
-  /exit          Exit the system
+  call          Register a new emergency call
+  queue         Show current call queue
+  dispatch      Handle next call in queue
+  history       View & manage handled cases
+  search <id>   Search case by ID (all cases)
+  report        Generate daily report
+  help          Show this help message
+  exit          Exit the system
 ```
 
 ---
@@ -558,15 +558,15 @@ int main() {
         cout << "\n> ";
         cin >> cmd;
 
-        if (cmd == "/call")         cmdCall();
-        else if (cmd == "/queue")   cmdQueue();
-        else if (cmd == "/dispatch")cmdDispatch();
-        else if (cmd == "/history") cmdHistory();
-        else if (cmd == "/search") {
-            // Cek apakah ada parameter setelah /search
+        if (cmd == "call")         cmdCall();
+        else if (cmd == "queue")   cmdQueue();
+        else if (cmd == "dispatch")cmdDispatch();
+        else if (cmd == "history") cmdHistory();
+        else if (cmd == "search") {
+            // Cek apakah ada parameter setelah search
             if (cin.peek() == '\n' || cin.peek() == '\r') {
-                cout << "Usage  : /search <id>\n";
-                cout << "Example: /search 5\n";
+                cout << "Usage  : search <id>\n";
+                cout << "Example: search 5\n";
             } else {
                 int id;
                 if (cin >> id) {
@@ -574,18 +574,18 @@ int main() {
                 } else {
                     cin.clear();
                     cin.ignore(1000, '\n');
-                    cout << "Invalid ID. Usage: /search <id>\n";
+                    cout << "Invalid ID. Usage: search <id>\n";
                 }
             }
         }
-        else if (cmd == "/report")  cmdReport();
-        else if (cmd == "/help")    cmdHelp();
-        else if (cmd == "/exit") {
+        else if (cmd == "report")  cmdReport();
+        else if (cmd == "help")    cmdHelp();
+        else if (cmd == "exit") {
             cout << "\nSystem shutdown. Goodbye.\n";
             break;
         }
         else {
-            cout << "Command not found: " << cmd << ". Type /help\n";
+            cout << "Command not found: " << cmd << ". Type help\n";
         }
     }
     return 0;
@@ -605,15 +605,15 @@ int main() {
 ║    Algoritma & Pemrograman — Kelompok 13     ║
 ╚══════════════════════════════════════════════╝
 
-System ready. Type /help for available commands.
+System ready. Type help for available commands.
 
 >
 ```
 
-### `/call` — Input kebakaran (kategori fixed)
+### `call` — Input kebakaran (kategori fixed)
 
 ```
-> /call
+> call
 
 === NEW EMERGENCY CALL ===
 Caller name   : Budi Santoso
@@ -640,10 +640,10 @@ Select: 1
 >
 ```
 
-### `/call` — Input custom kategori
+### `call` — Input custom kategori
 
 ```
-> /call
+> call
 
 === NEW EMERGENCY CALL ===
 Caller name   : Siti Rahayu
@@ -670,10 +670,10 @@ Select: Banjir
 >
 ```
 
-### `/queue` — Tampilkan antrian
+### `queue` — Tampilkan antrian
 
 ```
-> /queue
+> queue
 
 === CALL QUEUE (2 waiting) ===
   #  | ID  | Name            | Category    | Time
@@ -684,10 +684,10 @@ Select: Banjir
 >
 ```
 
-### `/dispatch` — Tangani kasus pertama
+### `dispatch` — Tangani kasus pertama
 
 ```
-> /dispatch
+> dispatch
 
 === DISPATCHING NEXT CALL ===
   Handling: #1 — Budi Santoso (Kebakaran)
@@ -698,10 +698,10 @@ Select: Banjir
 >
 ```
 
-### `/history` — Lihat riwayat
+### `history` — Lihat riwayat
 
 ```
-> /history
+> history
 
 === HANDLED CASES ===
   Last handled: #1 — Budi Santoso | Kebakaran | 14:32:01
@@ -722,10 +722,10 @@ Select: 0
 >
 ```
 
-### `/search 1` — Kasus ditemukan
+### `search 1` — Kasus ditemukan
 
 ```
-> /search 1
+> search 1
 
 === SEARCH RESULT ===
   Sorting cases (merge sort)... done.
@@ -743,10 +743,10 @@ Select: 0
 >
 ```
 
-### `/search 99` — Tidak ditemukan
+### `search 99` — Tidak ditemukan
 
 ```
-> /search 99
+> search 99
 
 === SEARCH RESULT ===
   Sorting cases (merge sort)... done.
@@ -757,21 +757,21 @@ Select: 0
 >
 ```
 
-### `/search` — Tanpa parameter
+### `search` — Tanpa parameter
 
 ```
-> /search
+> search
 
-Usage  : /search <id>
-Example: /search 5
+Usage  : search <id>
+Example: search 5
 
 >
 ```
 
-### `/report` — Laporan harian
+### `report` — Laporan harian
 
 ```
-> /report
+> report
 
 === DAILY REPORT ===
   Generating report using multithreading...
@@ -799,9 +799,9 @@ Example: /search 5
 ### Command tidak dikenali
 
 ```
-> /batman
+> batman
 
-Command not found: /batman. Type /help
+Command not found: batman. Type help
 
 >
 ```
@@ -823,7 +823,7 @@ Command not found: /batman. Type /help
 | Tampilkan Stack | O(n) | O(n) | O(n) |
 | Merge Sort | O(n log n) | O(n log n) | O(n log n) |
 | Binary Search | O(1) | O(log n) | O(log n) |
-| Total `/search` | O(n log n) | O(n log n) | O(n log n) |
+| Total `search` | O(n log n) | O(n log n) | O(n log n) |
 | Report per Thread | O(n) | O(n) | O(n) |
 | Report Paralel | O(n) | O(n) | O(n) |
 
@@ -859,13 +859,13 @@ Command not found: /batman. Type /help
 
 ```bash
 # Masuk ke direktori proyek
-cd emergency-call-center
+cd smart-call
 
 # Compile
-g++ -std=c++11 -pthread main.cpp core/store.cpp modules/call.cpp modules/dispatch.cpp modules/history.cpp modules/search.cpp modules/report.cpp modules/help.cpp utils/display.cpp -o emergency
+g++ -std=c++11 -pthread main.cpp core/store.cpp modules/call.cpp modules/dispatch.cpp modules/history.cpp modules/search.cpp modules/report.cpp modules/help.cpp utils/display.cpp -o index
 
 # Jalankan
-./emergency
+./index
 ```
 
 ---
@@ -892,15 +892,15 @@ Berikut instruksi spesifik saat mengimplementasikan PRD ini:
 
 4. **Thread safety** — Data `allCases[]` hanya dibaca (read-only) oleh thread report, tidak ada write. Maka tidak perlu mutex. Jika ada modifikasi di future, tambahkan `pthread_mutex_t`.
 
-5. **allCases update saat dispatch** — Saat `/dispatch`, scan `allCases[]` linear untuk menemukan kasus by ID dan update `status`-nya ke `"handled"`. Ini O(n) dan disengaja karena array tidak terurut saat insertion.
+5. **allCases update saat dispatch** — Saat `dispatch`, scan `allCases[]` linear untuk menemukan kasus by ID dan update `status`-nya ke `"handled"`. Ini O(n) dan disengaja karena array tidak terurut saat insertion.
 
-6. **Merge Sort menggunakan salinan** — Fungsi `/search` menyalin `allCases` ke array lokal sebelum sorting. **Jangan sort `allCases` langsung** karena urutan insertion harus terjaga untuk `/report`.
+6. **Merge Sort menggunakan salinan** — Fungsi `search` menyalin `allCases` ke array lokal sebelum sorting. **Jangan sort `allCases` langsung** karena urutan insertion harus terjaga untuk `report`.
 
 7. **Waktu rata-rata di report** — Karena tidak ada timestamp selesai, waktu penanganan disimulasikan: `simTime = (case.id % 10) + 5` (menghasilkan 5–14 menit). Ini deterministik dan cukup untuk keperluan demonstrasi akademik.
 
 8. **Welcome banner** — Gunakan karakter box-drawing Unicode: `╔ ╗ ╚ ╝ ║ ═`. Ini didukung oleh terminal Linux modern.
 
-9. **`/search` parameter parsing di main** — Setelah `cin >> cmd` membaca `/search`, gunakan `cin.peek()` untuk cek apakah ada karakter lagi di baris yang sama sebelum `\n`. Jika ada, `cin >> id`. Jika tidak, tampilkan usage message.
+9. **search parameter parsing di main** — Setelah `cin >> cmd` membaca `search`, gunakan `cin.peek()` untuk cek apakah ada karakter lagi di baris yang sama sebelum `\n`. Jika ada, `cin >> id`. Jika tidak, tampilkan usage message.
 
 10. **Tidak perlu free memory** — Untuk scope akademik dan demo singkat, memory leak dari linked list tidak perlu ditangani. Namun jika ingin bersih, tambahkan destructor atau fungsi `clearQueue()` / `clearStack()` yang memanggil `delete` pada setiap node.
 
