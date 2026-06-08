@@ -1,0 +1,10 @@
+index
+main.o
+core/store.o
+modules/call.o
+modules/dispatch.o
+modules/history.o
+modules/search.o
+modules/report.o
+modules/help.o
+utils/display.o
