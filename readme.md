@@ -38,7 +38,7 @@ Proyek ini mengimplementasikan empat konsep algoritma dan pemrograman:
 
 ---
 
-## 2. Arsitektur & Struktur File
+## 2. Arsitektur & Struktur File  
 
 ### 2.1 Struktur Direktori
 
